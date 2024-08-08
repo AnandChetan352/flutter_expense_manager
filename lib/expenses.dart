@@ -1,6 +1,7 @@
 import 'package:expense_tracker/Model/expense.dart';
 import 'package:expense_tracker/add_expense.dart';
 import 'package:expense_tracker/charts/pie_chart.dart';
+import 'package:expense_tracker/data_handlers/file_utils.dart';
 import 'package:expense_tracker/expenses_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -13,62 +14,57 @@ class Expenses extends StatefulWidget {
 }
 
 class _ExpensesState extends State<Expenses> {
-  void addExpense(Expense expense) {
+  Future<void> addExpense(Expense expense) async {
     setState(() {
       _registeredExpense.add(expense);
+      
     });
+    await FileUtils.writeListToFile(_registeredExpense);
   }
 
-  void removeExpense(Expense expense) {
-    
+  Future<void> removeExpense(Expense expense) async {
     final expenseIndex = _registeredExpense.indexOf(expense);
 
     setState(() {
       _registeredExpense.remove(expense);
     });
+    await FileUtils.writeListToFile(_registeredExpense);
 
     ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         duration: const Duration(seconds: 3),
-        content: Text("Removed ${expense.title}",),
-        action: SnackBarAction
-        (
+        content: Text(
+          "Removed ${expense.title}",
+        ),
+        action: SnackBarAction(
           label: "Undo",
-          onPressed: ()
-          {
+          onPressed: () async {
             setState(() {
               _registeredExpense.insert(expenseIndex, expense);
             });
-            
+            await FileUtils.writeListToFile(_registeredExpense);
           },
         ),
       ),
     );
   }
 
-  final List<Expense> _registeredExpense = [
-    Expense(
-        title: "Dummy Expense1",
-        amount: 12,
-        catagory: Catagory.food,
-        date: DateTime.now()),
-    Expense(
-        title: "Dummy Expense2",
-        amount: 120,
-        catagory: Catagory.leisure,
-        date: DateTime.now()),
-    Expense(
-        title: "Dummy Expense3",
-        amount: 90,
-        catagory: Catagory.work,
-        date: DateTime.now()),
-    Expense(
-        title: "Dummy Expense4",
-        amount: 102,
-        catagory: Catagory.travel,
-        date: DateTime.now())
-  ];
+
+  List<Expense> _registeredExpense = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadExpenses();
+  }
+
+  Future<void> _loadExpenses() async {
+    List<Expense> expenses = await FileUtils.readListFromFile();
+    setState(() {
+      _registeredExpense = expenses;
+    });
+  }
 
   void _addExpenseModalOverlay() {
     showModalBottomSheet(

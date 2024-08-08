@@ -17,6 +17,25 @@ const catagoryIcons = {
 };
 
 class Expense {
+
+  // Convert an Expense to a JSON-compatible map
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'title': title,
+        'amount': amount,
+        'date': date.toIso8601String(), // Convert DateTime to ISO 8601 string
+        'catagory': catagory.toString().split('.').last, // Store enum as string
+      };
+
+  // Create an Expense from a JSON-compatible map
+  factory Expense.fromJson(Map<String, dynamic> json) => Expense(
+        title: json['title'],
+        amount: json['amount'],
+        date: DateTime.parse(json['date']), // Parse date from ISO 8601 string
+        catagory: Catagory.values.firstWhere((e) => e.toString().split('.').last == json['catagory']),
+      );
+
+
   Expense(
       {required this.title,
       required this.amount,
@@ -52,4 +71,6 @@ class ExpenseBucket {
     }
     return sum;
   }
+
+  
 }
