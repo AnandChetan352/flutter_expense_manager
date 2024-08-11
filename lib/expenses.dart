@@ -2,6 +2,7 @@ import 'package:expense_tracker/Model/expense.dart';
 import 'package:expense_tracker/add_expense.dart';
 import 'package:expense_tracker/charts/pie_chart.dart';
 import 'package:expense_tracker/data_handlers/file_utils.dart';
+import 'package:expense_tracker/data_handlers/sms_data_manager.dart';
 import 'package:expense_tracker/expenses_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -85,6 +86,7 @@ class _ExpensesState extends State<Expenses>
   ///display add expenses overlay 
   void _addExpenseModalOverlay()
   {
+    //display modal sheet to add the overlay to "add Expense"
     showModalBottomSheet(
       isScrollControlled: true,
       context: context,
@@ -94,17 +96,28 @@ class _ExpensesState extends State<Expenses>
     );
   }
 
+  void _readSmsData()
+  {
+    ReadSmsDataToExpenseList smsListReader = ReadSmsDataToExpenseList();
+    var allSms = smsListReader.messages;
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) 
+  {
+    //if no expense is added
     Widget mainContent =
         const Center(child: Text("No Expenses Found! Start Adding Some."));
 
-    if (_registeredExpense.isNotEmpty) {
+    //update UI if expenses are added/loaded
+    if (_registeredExpense.isNotEmpty) 
+    {
       mainContent = ExpensesList(
         _registeredExpense,
         onRemoveExpense: removeExpense,
       );
     }
+
     return Scaffold(
       appBar: AppBar(
         actions: [
@@ -113,6 +126,12 @@ class _ExpensesState extends State<Expenses>
               _addExpenseModalOverlay();
             },
             icon: const Icon(Icons.add),
+          ),
+          IconButton(
+            onPressed: () {
+              _readSmsData();
+            },
+            icon: const Icon(Icons.sms),
           ),
         ],
         title: const Text("Expense Tracker"),

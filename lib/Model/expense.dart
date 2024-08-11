@@ -34,6 +34,7 @@ class Expense {
       );
 
 
+  //expense constructor
   Expense(
       {required this.title,
       required this.amount,
@@ -41,12 +42,14 @@ class Expense {
       required this.catagory})
       : id = uuid.v4();
 
+  //fields
   final String id;
   final String title;
   final double amount;
   final DateTime date;
   final Catagory catagory;
 
+ //getter properties
   String get formattedDate {
     return foramtter.format(date);
   }
