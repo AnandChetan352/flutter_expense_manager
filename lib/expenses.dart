@@ -13,24 +13,35 @@ class Expenses extends StatefulWidget {
   }
 }
 
-class _ExpensesState extends State<Expenses> {
+class _ExpensesState extends State<Expenses> 
+{
+  ///method to add expense
   Future<void> addExpense(Expense expense) async {
     setState(() {
+      //update UI with Set State
       _registeredExpense.add(expense);
-      
     });
+
+    //Update local JSON DB
     await FileUtils.writeListToFile(_registeredExpense);
   }
 
+  ///method to remove expense item
   Future<void> removeExpense(Expense expense) async {
+
+    //index of itme to remove
     final expenseIndex = _registeredExpense.indexOf(expense);
 
     setState(() {
+      //update UI
       _registeredExpense.remove(expense);
     });
+    //Update Local JSON DB
     await FileUtils.writeListToFile(_registeredExpense);
 
+    //Clear Previously Displayed Snack Bar
     ScaffoldMessenger.of(context).clearSnackBars();
+    //Display new Snack Bar
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         duration: const Duration(seconds: 3),
@@ -50,23 +61,30 @@ class _ExpensesState extends State<Expenses> {
     );
   }
 
-
   List<Expense> _registeredExpense = [];
 
   @override
   void initState() {
     super.initState();
+    //load expenses from JSON DB
     _loadExpenses();
   }
 
-  Future<void> _loadExpenses() async {
+  ///Load expenses from JSON DB
+  Future<void> _loadExpenses() async 
+  {
+    //read the local JSON DB
     List<Expense> expenses = await FileUtils.readListFromFile();
-    setState(() {
+    setState(()
+    {
+      //update UI
       _registeredExpense = expenses;
     });
   }
 
-  void _addExpenseModalOverlay() {
+  ///display add expenses overlay 
+  void _addExpenseModalOverlay()
+  {
     showModalBottomSheet(
       isScrollControlled: true,
       context: context,
