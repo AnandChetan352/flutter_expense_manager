@@ -5,7 +5,6 @@ import 'package:expense_tracker/data_handlers/file_utils.dart';
 import 'package:expense_tracker/data_handlers/sms_data_manager.dart';
 import 'package:expense_tracker/expenses_list.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class Expenses extends StatefulWidget {
   @override
@@ -96,10 +95,14 @@ class _ExpensesState extends State<Expenses>
     );
   }
 
-  void _readSmsData()
-  {
+  Future<void> _readSmsData()
+  async {
     ReadSmsDataToExpenseList smsListReader = ReadSmsDataToExpenseList();
-    var allSms = smsListReader.messages;
+    var smsData = await smsListReader.convertSmsToExpense();
+    setState(() {
+      _registeredExpense = smsData;
+    });
+    await FileUtils.writeListToFile(_registeredExpense);
   }
 
   @override
