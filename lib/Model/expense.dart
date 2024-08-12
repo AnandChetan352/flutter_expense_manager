@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:uuid/uuid.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -36,6 +34,7 @@ class Expense {
       );
 
 
+  //expense constructor
   Expense(
       {required this.title,
       required this.amount,
@@ -43,12 +42,14 @@ class Expense {
       required this.catagory})
       : id = uuid.v4();
 
+  //fields
   final String id;
   final String title;
   final double amount;
   final DateTime date;
   final Catagory catagory;
 
+ //getter properties
   String get formattedDate {
     return foramtter.format(date);
   }
