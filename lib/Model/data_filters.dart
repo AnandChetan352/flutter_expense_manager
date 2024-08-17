@@ -1,0 +1,1 @@
+enum ViewDataFrom {day, week, month, year}

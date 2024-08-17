@@ -3,6 +3,7 @@ import 'package:expense_tracker/add_expense.dart';
 import 'package:expense_tracker/charts/pie_chart.dart';
 import 'package:expense_tracker/data_handlers/file_utils.dart';
 import 'package:expense_tracker/data_handlers/sms_data_manager.dart';
+import 'package:expense_tracker/expenses_home.dart';
 import 'package:expense_tracker/expenses_list.dart';
 import 'package:flutter/material.dart';
 
@@ -115,10 +116,11 @@ class _ExpensesState extends State<Expenses>
     //update UI if expenses are added/loaded
     if (_registeredExpense.isNotEmpty) 
     {
-      mainContent = ExpensesList(
+      mainContent = ExpensesHome(expenses: _registeredExpense);
+      /* ExpensesList(
         _registeredExpense,
         onRemoveExpense: removeExpense,
-      );
+      ); */
     }
 
     return Scaffold(
@@ -141,7 +143,7 @@ class _ExpensesState extends State<Expenses>
       ),
       body: Column(
         children: [
-          ExpenseChart(expenses: _registeredExpense),
+         // ExpenseChart(expenses: _registeredExpense),
           Expanded(
             child: mainContent,
           ),
