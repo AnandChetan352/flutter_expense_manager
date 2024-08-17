@@ -14,6 +14,7 @@ static const List<String> foodKeywords = [
   'groceries',
   'catering',
   'snack',
+  'hungerbox'
 ];
 
 // Keywords associated with Travel

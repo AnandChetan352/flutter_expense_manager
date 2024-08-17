@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:isolate';
 import 'package:expense_tracker/Model/expense.dart';
 import 'package:expense_tracker/data_handlers/filterKeywords.dart';
@@ -8,7 +9,7 @@ import 'dart:async';
 class ReadSmsDataToExpenseList {
   final Telephony _telephonyInstance = Telephony.instance;
   final List<SmsMessage> _messages = [];
-  final List<Expense> expenses = []; 
+  final List<Expense> expenses = [];
   final List<String> _transactionKeywords = [
     "account",
     "bank",
@@ -16,69 +17,71 @@ class ReadSmsDataToExpenseList {
     "debit"
   ];
 
-  Future<List<Expense>> convertSmsToExpense()
-  async {
-    for(var message in await messages)
-    {
-      //create expense object from Message 
-      Expense expense = Expense(title: message.address ?? "SMS_EXPENSE_DATA", 
-      amount: _getAmountFromMessageBody(message.body ), date: convertEpochToDateTime(message.date), catagory: _getExpenseCatagory(message.body));
-      expenses.add(expense);
+  Future<List<Expense>> convertSmsToExpense() async {
+    List<String> amontZeroList = [];
+    for (var message in await messages) {
+      var amount = _getAmountFromMessageBody(message.body);
+      if (amount != 0.0) {
+        amontZeroList.add(message.body!);
+
+        //create expense object from Message
+        Expense expense = Expense(
+            title: message.address ?? "SMS_EXPENSE_DATA",
+            amount: amount,
+            date: convertEpochToDateTime(message.date),
+            catagory: _getExpenseCatagory(message.body));
+        expenses.add(expense);
+      }
     }
-    var a = 1;
+    var expenseWithAmountZero =
+        expenses.where((element) => element.amount == 0.0);
+    print("AMOUNT = 0 for ${expenseWithAmountZero.length} Messages");
     return expenses;
   }
 
-  static double _getAmountFromMessageBody(String? body)
-  {
+  static double _getAmountFromMessageBody(String? body) {
+    if (body == null) return 0.0;
 
-  if (body == null) return 0.0;
+    // Define a regex pattern for amounts preceded by "INR" or "RS."
+    final regex = RegExp(
+        r'\b(?:INR|RS\.?)\s*(\d+(?:,\d{2,3})*(?:\.\d{1,2})?)\b',
+        caseSensitive: false);
+    final match = regex.firstMatch(body);
 
-  // Define a regex pattern for currency amounts (e.g., 1000, 1000.00, 1,000)
-  final regex = RegExp(r'\b\d{1,3}(?:,\d{3})*(?:\.\d{2})?\b');
-  final match = regex.firstMatch(body);
+    if (match != null) {
+      // Convert the matched amount to a double, removing any commas
+      final amountStr = match.group(1)?.replaceAll(',', '');
+      return double.tryParse(amountStr ?? "0.0") ?? 0.0;
+    }
 
-  if (match != null) {
-    // Convert the matched amount to a double
-    final amountStr = match.group(0)?.replaceAll(',', '');
-    return double.tryParse(amountStr ?? "0.0") ?? 0.0;
+    return 0.0;
   }
 
-  return 0.0;
-}
-
-  static DateTime convertEpochToDateTime(int? epochMilliseconds) 
-  {
-    if(epochMilliseconds == null)
-    {
+  static DateTime convertEpochToDateTime(int? epochMilliseconds) {
+    if (epochMilliseconds == null) {
       return DateTime.now();
     }
     return DateTime.fromMillisecondsSinceEpoch(epochMilliseconds);
   }
 
-    static Catagory _getExpenseCatagory(String? messageBody)
-    {
-      if(messageBody != null)
-      {
+  static Catagory _getExpenseCatagory(String? messageBody) {
+    if (messageBody != null) {
+      final Map<Catagory, List<String>> categoryKeywords = {
+        Catagory.food: FilterKeywords.foodKeywords,
+        Catagory.travel: FilterKeywords.travelKeywords,
+        Catagory.work: FilterKeywords.workKeywords,
+        Catagory.leisure: FilterKeywords.leisureKeywords,
+      };
 
-    final Map<Catagory, List<String>> categoryKeywords = {
-      Catagory.food: FilterKeywords.foodKeywords,
-      Catagory.travel: FilterKeywords.travelKeywords,
-      Catagory.work: FilterKeywords.workKeywords,
-      Catagory.leisure: FilterKeywords.leisureKeywords,
-    };
-
-    for (var entry in categoryKeywords.entries) {
-      if (entry.value.any((keyword) => messageBody.toLowerCase().contains(keyword.toLowerCase()))) {
-        return entry.key;
+      for (var entry in categoryKeywords.entries) {
+        if (entry.value.any((keyword) =>
+            messageBody.toLowerCase().contains(keyword.toLowerCase()))) {
+          return entry.key;
+        }
       }
     }
-      }
-      return Catagory.leisure;
-  
+    return Catagory.leisure;
   }
-
-
 
   static const int chunkSize = 10000;
 
@@ -104,7 +107,12 @@ class ReadSmsDataToExpenseList {
 
   Future<void> _readAllSms() async {
     List<SmsMessage> messages = await _telephonyInstance.getInboxSms(
-      columns: [SmsColumn.SUBJECT , SmsColumn.ADDRESS, SmsColumn.BODY, SmsColumn.DATE],
+      columns: [
+        SmsColumn.SUBJECT,
+        SmsColumn.ADDRESS,
+        SmsColumn.BODY,
+        SmsColumn.DATE
+      ],
     );
 
     _messages.clear();
@@ -159,8 +167,9 @@ class ReadSmsDataToExpenseList {
           for (var keyword in keywords) {
             var messageBody = message.body?.toLowerCase();
             if (messageBody != null) {
-              if (messageBody.contains(keyword.toLowerCase()) && (messageBody.contains("debit") || messageBody.contains("debited"))) 
-              {
+              if (messageBody.contains(keyword.toLowerCase()) &&
+                  (messageBody.contains("debit") ||
+                      messageBody.contains("debited"))) {
                 return true;
               }
             }
