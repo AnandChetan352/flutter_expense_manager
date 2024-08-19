@@ -13,7 +13,7 @@ void main() {
     MaterialApp(
       darkTheme: _darkTheme,
       theme: _lightTheme,
-      home: Expenses(),
+      home: const Expenses(),
     ),
   );
 }

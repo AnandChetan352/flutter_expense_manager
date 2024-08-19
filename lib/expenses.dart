@@ -1,13 +1,13 @@
 import 'package:expense_tracker/Model/expense.dart';
 import 'package:expense_tracker/add_expense.dart';
-import 'package:expense_tracker/charts/pie_chart.dart';
 import 'package:expense_tracker/data_handlers/file_utils.dart';
 import 'package:expense_tracker/data_handlers/sms_data_manager.dart';
 import 'package:expense_tracker/expenses_home.dart';
-import 'package:expense_tracker/expenses_list.dart';
 import 'package:flutter/material.dart';
 
 class Expenses extends StatefulWidget {
+  const Expenses({super.key});
+
   @override
   State<StatefulWidget> createState() {
     return _ExpensesState();
@@ -116,7 +116,7 @@ class _ExpensesState extends State<Expenses>
     //update UI if expenses are added/loaded
     if (_registeredExpense.isNotEmpty) 
     {
-      mainContent = ExpensesHome(expenses: _registeredExpense);
+      mainContent = ExpensesHome(onRemoveExpense: removeExpense);
       /* ExpensesList(
         _registeredExpense,
         onRemoveExpense: removeExpense,
@@ -132,12 +132,7 @@ class _ExpensesState extends State<Expenses>
             },
             icon: const Icon(Icons.add),
           ),
-          IconButton(
-            onPressed: () {
-              _readSmsData();
-            },
-            icon: const Icon(Icons.sms),
-          ),
+        
         ],
         title: const Text("Expense Tracker"),
       ),
@@ -145,7 +140,7 @@ class _ExpensesState extends State<Expenses>
         children: [
          // ExpenseChart(expenses: _registeredExpense),
           Expanded(
-            child: mainContent,
+            child: ExpensesHome(onRemoveExpense: removeExpense),
           ),
         ],
       ),
