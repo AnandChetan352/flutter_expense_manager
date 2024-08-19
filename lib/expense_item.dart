@@ -30,7 +30,7 @@ class ExpenseItem extends StatelessWidget {
               Row(children: [
                 //ammount
                 Text(
-                  "\$${expense.amount.toStringAsFixed(2)}",
+                  "₹${expense.amount.toStringAsFixed(2)}",
                 ),
                 //space evenly
                 const Spacer(),
